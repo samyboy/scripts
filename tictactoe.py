@@ -5,23 +5,27 @@ import sys
 import time
 import os
 
+
 def _input(bla=''):
     if sys.version_info[0] == 2:
         return raw_input(bla)
     return input(bla)
-    
+
+
 def draw_game(board):
     clear()
     draw_board(board)
 
+
 def draw_board(b):
-    print ' ' +  b[7] + ' | ' + b[8] + ' | ' + b[9]
+    print ' ' + b[7] + ' | ' + b[8] + ' | ' + b[9]
     print '---|---|---'
     print ' ' + b[4] + ' | ' + b[5] + ' | ' + b[6]
     print '---|---|---'
     print ' ' + b[1] + ' | ' + b[2] + ' | ' + b[3]
 
-def ask_yes(enter_means_yes = True):
+
+def ask_yes(enter_means_yes=True):
     answer = _input()
     if len(answer) == 0 and enter_means_yes:
         return True
@@ -34,6 +38,7 @@ def ask_player_letter():
         return False
     return letter
 
+
 def get_first_player():
     # Randomly choose the player who goes first.
     if random.randint(0, 1) == 0:
@@ -41,17 +46,22 @@ def get_first_player():
     else:
         return 'player'
 
+
 def ask_player_move(board):
     while True:
         player_move = _input("What is your move? > ")
 
         if not player_move.isdigit():
-            print "This won't work: please pick an available number: ", get_board_empty_slots(board)
+            print "This won't work: please pick an available number: ",
+            get_board_empty_slots(board)
         else:
             player_move = int(player_move)
             if player_move in get_board_empty_slots(board):
                 return player_move
-            print "This space is not free... please pick an available number: ", get_board_empty_slots(board)
+            print "This space is not free... ",
+            "please pick an available number: ",
+            get_board_empty_slots(board)
+
 
 def get_board_empty_slots(board):
     slots = []
@@ -61,27 +71,32 @@ def get_board_empty_slots(board):
         if b == ' ':
             slots.append(i)
     return slots
-        
+
+
 def is_full(board):
     return len(get_board_empty_slots(board)) == 0
 
+
 def write_move(board, letter, move):
     board[int(move)] = letter
+
 
 def is_winner(board, letter):
     b = board
     l = letter
     return ((b[7] == l and b[8] == l and b[9] == l) or  # top
-    (b[4] == l and b[5] == l and b[6] == l) or # middle hor.
-    (b[1] == l and b[2] == l and b[3] == l) or # bottom
-    (b[7] == l and b[4] == l and b[1] == l) or # left
-    (b[8] == l and b[5] == l and b[2] == l) or # middle vert.
-    (b[9] == l and b[6] == l and b[3] == l) or # right
-    (b[1] == l and b[5] == l and b[9] == l) or # cross (slash)
-    (b[3] == l and b[5] == l and b[7] == l))   # cross (backslash)
+    (b[4] == l and b[5] == l and b[6] == l) or  # middle hor.
+    (b[1] == l and b[2] == l and b[3] == l) or  # bottom
+    (b[7] == l and b[4] == l and b[1] == l) or  # left
+    (b[8] == l and b[5] == l and b[2] == l) or  # middle vert.
+    (b[9] == l and b[6] == l and b[3] == l) or  # right
+    (b[1] == l and b[5] == l and b[9] == l) or  # cross (slash)
+    (b[3] == l and b[5] == l and b[7] == l))    # cross (backslash)
+
 
 def clear():
-    os.system(['clear','cls'][os.name == 'nt'])
+    os.system(['clear', 'cls'][os.name == 'nt'])
+
 
 def get_comp_move(board, comp_letter, player_letter):
 
@@ -120,9 +135,8 @@ def get_comp_move(board, comp_letter, player_letter):
         if s in empty_slots:
             return s
 
-    sys.stderr.write("I DON'T KNOW WHAT TO DO !")
-    return False
-    
+    raise Exception("I DON'T KNOW WHAT TO DO !")
+
 
 clear()
 print "Welcome to tic tac toe!"
@@ -150,7 +164,6 @@ while True:
 
     board = [' '] * 10
     clear()
-
 
     # determine who starts first
     if get_first_player() == 'computer':
