@@ -1,0 +1,16 @@
+#!/bin/bash
+# chows the timestamp of the more recent modification in a folder
+# 
+set -e
+
+folder=$1
+
+if [ -z $folder ]; then
+    echo missing operand
+    exit 1
+fi
+
+folder=$1
+
+find $folder -printf "%T@\n" | sort -r | head -n 1
+
