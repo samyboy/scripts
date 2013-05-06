@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+# send an email of pattern matching in a growing file
+#
+# based on: http://stackoverflow.com/questions/4331309/shellscript-to-monitor-a-log-file-if-keyword-triggers-then-execute-a-command
+#
+
+show_usage(){
+  cat <<EOF
+grepmail 1.0
+Send email of pattern in growing file
+
+Usage: grepmail <pattern> <filename> [email]
+
+EOF
+}
+
+error() {
+  echo "$@" 1>&2;
+}
+
+pattern=$1
+filename=$2
+mailto=$3
+
+#
+# Command arguments handling
+#
+
+# handle -h, --help
+for arg in "$@"
+do
+  case "$arg" in
+  -h|--help)
+    show_usage
+    exit 0 
+    ;;
+  esac
+done
+
+# script invoked with no command line args: exit with error
+if [ $# -eq "0" ]; then
+  error Error: no argument given. Use --help for more informations.
+  exit 1
+fi
+
+# must specify filename
+if [ -z $filename ]; then
+  error Error: No filename given. Use --help for more informations.
+  exit 1
+fi
+
+# must specify pattern
+if [ -z $pattern ]; then
+  error Error: no pattern given. Use --help for more informations.
+  exit 1
+fi
+
+# if email not specified, then use root. Because who else?
+[ -z $mailto ] && mailto="root"
+
+# start the action
+/usr/bin/tail -Fn0 "$filename" | \
+while read line ; do
+  echo "$line" | /bin/grep --quiet "$pattern"
+  if [ $? = 0 ]; then
+    echo "$line" | mail -s "grepmail found \"$pattern\" in \"$filename\"" $mailto
+  fi
+done
+
+
