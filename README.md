@@ -1,4 +1,5 @@
-useless
+scripts
 =======
 
-Useless scripts. Don't go in there
+Some scripts
+
