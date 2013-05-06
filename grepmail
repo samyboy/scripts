@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # send an email of pattern matching in a growing file
+# source: https://github.com/samyboy/scripts
 #
 # based on: http://stackoverflow.com/questions/4331309/shellscript-to-monitor-a-log-file-if-keyword-triggers-then-execute-a-command
 #
