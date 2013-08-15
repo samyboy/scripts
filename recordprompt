@@ -9,19 +9,17 @@ set -e
 # use timestamps instead of real dates
 timestamp="no"
 # destination folder
-dest_folder=~/.records
-mkdir -p ~/.records
+dest_folder=~/.recordprompt
 
 function replay {
     [ ! -f $1.timing.nosleep ] && awk '$1>1  { $1="1.000000" } {print}' $1.timing > $1.timing.nosleep
     scriptreplay -t $1.timing.nosleep $1
-    /bin/rm -f $f.timing.nosleep
 }
 
 function record {
     f=$1
     script --quiet --timing=$f.timing $f
-    echo "Type \"prompt_replay $f\" to replay"
+    echo "Type \"recordprompt $f\" to replay"
 }
 
 
@@ -49,16 +47,24 @@ done
 if [ -z $outfile ]; then
     # no outfile: recording
 
+    mkdir -p $dest_folder
+
     if [[ $timestamp == y* ]]; then
         currdate=$(/bin/date +"%s.%N")
     else
         currdate=$(/bin/date +"%Y-%m-%d-%H.%M.%N")
     fi
 
-    outfile=$dest_folder/record-$USER-$currdate
+    outfile=$dest_folder/record-$USER-$currdate.rec
     echo "Starting record to \"$outfile\""
     record $outfile
 else
     # replay
+    if [ ! -f $outfile ] ; then
+        echo "File \"$outfile\" does not exist. Available files:"
+        /bin/ls -1 $dest_folder/*.rec
+        exit 1
+    fi
+
     replay $outfile
 fi
