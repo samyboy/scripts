@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# This command easily records your command line.
+# The commands "script" and "scriptreplay" from package bsdutils are used.
+#
+
+# exit on error
+set -e
+# use timestamps instead of real dates
+timestamp="no"
+# destination folder
+dest_folder=~/.records
+mkdir -p ~/.records
+
+function replay {
+    [ ! -f $1.timing.nosleep ] && awk '$1>1  { $1="1.000000" } {print}' $1.timing > $1.timing.nosleep
+    scriptreplay -t $1.timing.nosleep $1
+    /bin/rm -f $f.timing.nosleep
+}
+
+function record {
+    f=$1
+    script --quiet --timing=$f.timing $f
+    echo "Type \"prompt_replay $f\" to replay"
+}
+
+
+# main
+outfile=""
+while test $# -gt 0; do
+    case "$1" in
+        -h|--help)
+            echo "How to record:"
+            echo "    $0"
+            echo 
+            echo "How to replay:"
+            echo "    $0 replayfile"
+            echo 
+            echo "The replay files are automatically stored in "$dest_folder""
+            exit 0
+            ;;
+        *)
+        outfile=$1
+        break
+        ;;
+    esac
+done
+
+if [ -z $outfile ]; then
+    # no outfile: recording
+
+    if [[ $timestamp == y* ]]; then
+        currdate=$(/bin/date +"%s.%N")
+    else
+        currdate=$(/bin/date +"%Y-%m-%d-%H.%M.%N")
+    fi
+
+    outfile=$dest_folder/record-$USER-$currdate
+    echo "Starting record to \"$outfile\""
+    record $outfile
+else
+    # replay
+    replay $outfile
+fi
