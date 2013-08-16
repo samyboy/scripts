@@ -10,15 +10,32 @@ set -e
 timestamp="no"
 # destination folder
 dest_folder=~/.recordprompt
+# do not wait if console is idle
+CUT="no"
+
+timing_prefix=".timing"
+cut_prefix=".cut"
 
 function replay {
-    [ ! -f $1.timing.nosleep ] && awk '$1>1  { $1="1.000000" } {print}' $1.timing > $1.timing.nosleep
-    scriptreplay -t $1.timing.nosleep $1
+    replay_file=$1
+    timing_file=${replay_file}${timing_prefix}
+    [ -f ${timing_file}${cut_prefix} ] && timing_file=${timing_file}${cut_prefix}
+    echo scriptreplay -t $timing_file $replay_file
+    scriptreplay -t $timing_file $replay_file
+    echo "-- The End --"
+}
+
+function edit_cut {
+    file=$1
+    seconds="1"
+    echo edit_cut $1 $2
+    awk '$1>'${seconds}'  { $1="'${seconds}'" } {print}' \
+        ${file}${timing_prefix} > ${file}${timing_prefix}${cut_prefix}
 }
 
 function record {
     f=$1
-    script --quiet --timing=$f.timing $f
+    script --quiet --timing=$f${timing_refix} $f
     echo "Type \"recordprompt $f\" to replay"
 }
 
@@ -28,19 +45,28 @@ outfile=""
 while test $# -gt 0; do
     case "$1" in
         -h|--help)
+            echo "$0 records your command line."
+            echo "It's an easy interface to the \"script\" and \"scriptreplay\" commands."
+            echo
             echo "How to record:"
             echo "    $0"
             echo 
             echo "How to replay:"
             echo "    $0 replayfile"
+            echo "    $0 --cut replayfile"
             echo 
+            echo "The --cut option removes long pauses"
             echo "The replay files are automatically stored in "$dest_folder""
             exit 0
             ;;
+        -c|--cut)
+            shift
+            CUT="yes"
+            ;;
         *)
-        outfile=$1
-        break
-        ;;
+            outfile=$1
+            break
+            ;;
     esac
 done
 
@@ -66,5 +92,9 @@ else
         exit 1
     fi
 
-    replay $outfile
+    if [[ $CUT == y* ]]; then
+        edit_cut $outfile
+    fi
+
+    replay $outfile 
 fi
